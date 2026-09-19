@@ -40,6 +40,10 @@ public class ProblemController {
 
     @PostMapping
     public Problem createProblem(@RequestBody Problem problem) {
+        // 新建记录：提交者即负责人
+        if (problem.getOwnerId() == null || problem.getOwnerId().isBlank()) {
+            problem.setOwnerId(problem.getCreatedBy());
+        }
         return problemRepository.save(problem);
     }
 
@@ -55,6 +59,15 @@ public class ProblemController {
                     problem.setTags(problemDetails.getTags());
                     problem.setTimeLimit(problemDetails.getTimeLimit());
                     problem.setMemoryLimit(problemDetails.getMemoryLimit());
+                    // 归属保持不变：普通更新不允许覆盖负责人
+                    // 协作者名单由负责人通过显式字段维护
+                    if (problemDetails.getCollaborators() != null) {
+                        problem.setCollaborators(problemDetails.getCollaborators());
+                    }
+                    if (problem.getOwnerId() == null && problemDetails.getOwnerId() != null) {
+                        problem.setOwnerId(problemDetails.getOwnerId());
+                        problem.setOwnerName(problemDetails.getOwnerName());
+                    }
                     Problem updated = problemRepository.save(problem);
                     return ResponseEntity.ok(updated);
                 })

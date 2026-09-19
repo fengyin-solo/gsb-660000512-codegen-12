@@ -5,19 +5,14 @@ import { InterviewerRoomView } from './components/InterviewerRoomView';
 import CandidateRoomView from './components/CandidateRoomView';
 import { ProblemBankPage } from './components/ProblemBankPage';
 import { useInterviewStore } from './store/interview';
-import { InterviewRoom, User } from './types';
+import { InterviewRoom } from './types';
 import { CreateRoomModal } from './components/CreateRoomModal';
 import { getRoomsByInterviewer } from './services/interviewRoomService';
 import { ToastContainer } from './components/Toast';
 import { useToastStore } from './store/toast';
-
-const mockInterviewer: User = {
-  id: 'interviewer-001',
-  name: '张面试官',
-  email: 'interviewer@example.com',
-  role: 'INTERVIEWER',
-  createdAt: new Date().toISOString(),
-};
+import { SessionSwitcher } from './components/SessionSwitcher';
+import { LocalModeBanner } from './components/LocalModeBanner';
+import { getSessionUser } from './services/sessionService';
 
 const InterviewerHomePage: React.FC = () => {
   const { currentUser, setCurrentUser, myRooms, setMyRooms, setCurrentRoom } = useInterviewStore();
@@ -26,7 +21,8 @@ const InterviewerHomePage: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-    setCurrentUser(mockInterviewer);
+    // 以本地会话中的用户作为当前用户（区分不同角色提交记录的负责人）
+    setCurrentUser(getSessionUser());
   }, [setCurrentUser]);
 
   useEffect(() => {
@@ -103,7 +99,8 @@ const InterviewerHomePage: React.FC = () => {
             <div style={{ color: '#888', fontSize: '12px' }}>{currentUser?.role}</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <SessionSwitcher />
           {activeTab === 'bank' ? null : (
             <button
               onClick={() => setIsCreateModalOpen(true)}
@@ -122,6 +119,8 @@ const InterviewerHomePage: React.FC = () => {
           )}
         </div>
       </div>
+
+      <LocalModeBanner />
 
       <div style={{ background: '#1e1e1e', borderBottom: '1px solid #333' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', display: 'flex', gap: '8px' }}>

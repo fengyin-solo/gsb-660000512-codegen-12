@@ -1,3 +1,10 @@
+export interface Collaborator {
+  userId: string;
+  userName: string;
+  grantedAt: string;
+  grantedBy: string;
+}
+
 export interface Problem {
   id: string; title: string; difficulty: 'easy' | 'medium' | 'hard';
   description: string;
@@ -7,6 +14,16 @@ export interface Problem {
   createdAt?: string;
   updatedAt?: string;
   createdBy?: string;
+  /** 负责人（记录归属）ID */
+  ownerId?: string;
+  /** 负责人名称（冗余，便于离线/列表展示） */
+  ownerName?: string;
+  /** 授权协作者 ID 列表，只有负责人与协作者可改动 */
+  collaborators?: Collaborator[];
+  /** 本地模式使用：最近一次写入的内容指纹，用于冲突检测 */
+  contentHash?: string;
+  /** 本地模式使用：服务端基线版本（updatedAt），离线前最后一次同步值 */
+  baseVersion?: string;
 }
 
 export interface CreateProblemRequest {
@@ -18,6 +35,10 @@ export interface CreateProblemRequest {
   tags: string[];
   timeLimit: number;
   memoryLimit: number;
+  ownerId?: string;
+  ownerName?: string;
+  collaborators?: Collaborator[];
+  createdBy?: string;
 }
 
 export interface UpdateProblemRequest extends Partial<CreateProblemRequest> {
@@ -308,3 +329,36 @@ export const formatTime = (dateString: string): string => {
     second: '2-digit',
   });
 };
+
+/** 操作权限 */
+export type ProblemPermission = 'owner' | 'collaborator' | 'viewer';
+
+/** 403 授权问题：恢复同步时先提示 */
+export interface PermissionIssue {
+  problemId: string;
+  problemTitle: string;
+  ownerId: string;
+  ownerName: string;
+  reason: string;
+}
+
+/** 冲突记录不能覆盖，逐条选择如何同步 */
+export interface SyncConflict {
+  problemId: string;
+  problemTitle: string;
+  /** 本地（离线期间）版本 */
+  local: Problem;
+  /** 服务端（他人改动后）版本 */
+  remote: Problem;
+  /** 共同基线版本标识（updatedAt） */
+  baseVersion?: string;
+}
+
+export interface PendingSyncSummary {
+  conflicts: SyncConflict[];
+  permissionIssues: PermissionIssue[];
+  clean: Problem[];
+}
+
+/** 用户对某条冲突记录的选择，归属保持不变 */
+export type ConflictResolution = 'keep_local' | 'use_remote' | 'skip';

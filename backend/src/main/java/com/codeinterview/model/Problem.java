@@ -23,6 +23,13 @@ public class Problem {
     private int timeLimit = 2000;
     private int memoryLimit = 256;
     private String createdBy;
+    /** 负责人 ID（记录归属） */
+    private String ownerId;
+    /** 负责人名称（冗余展示） */
+    private String ownerName;
+    /** 授权协作者列表，JSON 数组：[{userId,userName,grantedAt,grantedBy}] */
+    @Column(columnDefinition = "TEXT")
+    private String collaborators;
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
 
@@ -51,6 +58,12 @@ public class Problem {
     public void setMemoryLimit(int memoryLimit) { this.memoryLimit = memoryLimit; }
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public String getOwnerId() { return ownerId; }
+    public void setOwnerId(String ownerId) { this.ownerId = ownerId; }
+    public String getOwnerName() { return ownerName; }
+    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+    public String getCollaborators() { return collaborators; }
+    public void setCollaborators(String collaborators) { this.collaborators = collaborators; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

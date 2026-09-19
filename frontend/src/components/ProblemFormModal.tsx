@@ -4,6 +4,8 @@ import { DIFFICULTY_TAGS } from '../types';
 import { createProblem, updateProblem } from '../services/problemService';
 import { useInterviewStore } from '../store/interview';
 import { useToastStore } from '../store/toast';
+import { getSessionUser, getUserName } from '../services/sessionService';
+import { getPermission } from '../services/permissionService';
 
 interface ProblemFormModalProps {
   isOpen: boolean;
@@ -224,6 +226,18 @@ export const ProblemFormModal: React.FC<ProblemFormModalProps> = ({
           <div style={{ padding: '24px' }}>
             {activeTab === 'basic' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{
+                  padding: '10px 14px', borderRadius: '6px', fontSize: '13px',
+                  background: isEditing ? 'rgba(102,126,234,0.08)' : 'rgba(76,175,80,0.08)',
+                  border: `1px solid ${isEditing ? 'rgba(102,126,234,0.3)' : 'rgba(76,175,80,0.3)'}`,
+                  color: '#aaa',
+                }}>
+                  {isEditing
+                    ? <>负责人：<b style={{ color: '#9aa7f5' }}>{editingProblem?.ownerName || getUserName(editingProblem?.ownerId || editingProblem?.createdBy)}</b>
+                        {getPermission(editingProblem!, getSessionUser()) === 'collaborator' && '（您是授权协作者，可编辑内容但不能改变归属）'}
+                        ；归属不会被修改。</>
+                    : <>新建记录的负责人将是当前用户：<b style={{ color: '#7fd883' }}>{getSessionUser().name}</b></>}
+                </div>
                 <div>
                   <label style={{ display: 'block', color: '#ccc', marginBottom: '6px', fontSize: '14px' }}>题目标题 *</label>
                   <input
